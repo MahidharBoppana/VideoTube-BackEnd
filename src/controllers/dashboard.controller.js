@@ -24,6 +24,33 @@ const getChannelStats = asyncHandler(async (req, res) => {
       },
     },
   ]);
+
+  const totalVideos = videoStats[0]?.totalVideos || 0;
+
+  const totalViews = videoStats[0]?.totalViews || 0;
+
+  const totalSubscribers = await Subscription.countDocuments({
+    channel: channelId,
+  });
+
+  const videos = await Video.find({ owner: channelId });
+
+  const videoIds = videos.map((video) => video._id);
+
+  const totalLikes = await Like.countDocuments({ video: { $in: videoIds } });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        totalVideos,
+        totalViews,
+        totalSubscribers,
+        totalLikes,
+      },
+      "Channel stats fetched successfully"
+    )
+  );
 });
 
 const getChannelVideos = asyncHandler(async (req, res) => {
